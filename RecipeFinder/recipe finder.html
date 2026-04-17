@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Finder</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="mt-2 mb-4">Recipe Finder</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form id="searchForm">
+          <div class="form-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="Search for recipes...">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Search</button>
+        </form>
+      </div>
+    </div>
+    <div class="row mt-5" id="recipesContainer">
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#searchForm').submit(function(event) {
+        event.preventDefault();
+        var searchTerm = $('#searchInput').val().trim();
+        if (searchTerm !== '') {
+          searchRecipes(searchTerm);
+        }
+      });
+
+      function searchRecipes(query) {
+        var apiUrl = 'https://www.themealdb.com/api/json/v1/1/search.php?s=' + encodeURIComponent(query);
+
+        $.ajax({
+          url: apiUrl,
+          method: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            displayRecipes(data.meals);
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+          }
+        });
+      }
+
+      function displayRecipes(recipes) {
+        var recipesContainer = $('#recipesContainer');
+        recipesContainer.empty();
+
+        if (recipes === null) {
+         recipesContainer.append('<p style="color: red; text-align: center;">No recipes found.</p>');
+
+
+        } else {
+          recipes.forEach(function(recipe) {
+            var recipeCard = `
+              <div class="col-md-4 mb-4">
+                <div class="card">
+                  <img src="${recipe.strMealThumb}" class="card-img-top" alt="${recipe.strMeal}">
+                  <div class="card-body">
+                    <h5 class="card-title">${recipe.strMeal}</h5>
+                    <p class="card-text">Category: ${recipe.strCategory}</p>
+                    <p class="card-text">Area: ${recipe.strArea}</p>
+                    <a href="${recipe.strYoutube}" class="btn btn-primary" target="_blank">Watch Recipe</a>
+                  </div>
+                </div>
+              </div>
+            `;
+            recipesContainer.append(recipeCard);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
